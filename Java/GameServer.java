@@ -1,51 +1,59 @@
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
 
-public class GameServer{
-    public void Start(){
+public class GameServer {
+    public void Start(int playerNum) {
         System.out.println("game server start");
         int port = 8888;
+        GamePlayer player1 = null;
+        GamePlayer player2 = null;
         ServerSocket server = null;
-        Socket client1 = null;
-        ObjectOutputStream oos1 = null;
-        ObjectInputStream ois1 = null;
-        Socket client2 = null;
-        ObjectOutputStream oos2 = null;
-        ObjectInputStream ois2 = null;
+
         try {
             server = new ServerSocket(port);
         } catch (IOException e) {
             System.out.println("Server Start error");
         }
-        try {
-                client1 = server.accept();
-                oos1 = new ObjectOutputStream(client1.getOutputStream());
-                ois1 = new ObjectInputStream(client1.getInputStream());
-                
-                System.out.println("client1 is connecting");
-            } catch (IOException e) {
-                System.out.println("client1 connecting Error");
-                
-            }
-        try {
-                client2 = server.accept();
-                oos2 = new ObjectOutputStream(client2.getOutputStream());
-                ois2 = new ObjectInputStream(client2.getInputStream());
-                System.out.println("client2 is connecting");
-            } catch (IOException e) {
-                System.out.println("client2 connecting Error");
-                
-            }
+        // try {
+        //     Socket clientConnection = server.accept();
+        //     player1 = new GamePlayer(clientConnection, new ObjectOutputStream(clientConnection.getOutputStream()),
+        //             new ObjectInputStream(clientConnection.getInputStream()));
 
+        //     System.out.println("client1 is connecting");
+        // } catch (IOException e) {
+        //     System.out.println("client1 connecting Error");
+        // 
+        // }
+        // try {
+        //     Socket clientConnection = server.accept();
+        //     player2 = new GamePlayer(clientConnection, new ObjectOutputStream(clientConnection.getOutputStream()),
+        //             new ObjectInputStream(clientConnection.getInputStream()));
+
+        //     System.out.println("client2 is connecting");
+        // } catch (IOException e) {
+        //     System.out.println("client2 connecting Error");
+
+        // }
+        //GamePlayer players[] = { player1, player2 };
+        ArrayList<GamePlayer> players = new ArrayList<>();
+        for (int i = 0; i < playerNum; i++) {
+            GamePlayer player = null;
             try {
-                GameInfo gameInfo = new GameInfo();
-                gameInfo.sender = "server";
-                gameInfo.message = "hi";
-                oos1.writeObject(gameInfo);
-                oos2.writeObject(gameInfo);
+                Socket clientConnection = server.accept();
+                player = new GamePlayer(clientConnection, new ObjectOutputStream(clientConnection.getOutputStream()),
+                        new ObjectInputStream(clientConnection.getInputStream()));
             } catch (IOException e) {
-                System.out.println("something wrong ");
-                System.out.println(e);;
+                //TODO: handle exception
+                System.out.println(e);
             }
+            players.add(player);
+            System.out.println("client" + i + " is connecting");
+        }
+        GamePlayer players2[] = {};
+        Game game = new Game(players.toArray(players2));
+        game.start();
+        System.out.println("game start");
+
     }
 }
