@@ -23,9 +23,18 @@ public class GameClient {
                 System.out.println(((GameInfo) ois.readObject()).toString());
 
             } catch (Exception e) {
-                System.out.println("got something wrong");
-                System.out.println(e);
+                System.out.println("got something wrong at client");
+                e.printStackTrace();
+                try {
+                    server.close();
+                    break;
+                } catch (Exception ee) {
+                    //TODO: handle exception
+                }
+                    
+                   
             }
+            
         }
         
     }

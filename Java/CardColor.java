@@ -4,4 +4,5 @@ enum CardColor{
     YELLOW,
     BLUE,
     GREEN,
+    SMILE
 }
