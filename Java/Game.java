@@ -57,6 +57,29 @@ public class Game{
         }
     }
     
+    private GameInfo generateServerToClientGameInfo(GameMessage message,GamePlayer player){
+        GameInfo gameInfo = new GameInfo();
+        gameInfo.sender = "server";
+        gameInfo.message = message;
+        gameInfo.copy = new GameSnapshot(cardPile,cardGroup,players);
+        gameInfo.copy.cardPile = new ArrayList<Card>();
+        gameInfo.copy.hands = new ArrayList<ArrayList<Card>>();
+        gameInfo.remainCardPileNumber = cardPile.size();
+        gameInfo.isBreakedTheIce = player.isBreakedTheIce;
+        gameInfo.playersHand = (ArrayList<Card>)player.hand.clone();
+        return gameInfo;
+
+    }
+
+    private boolean checkTheMovement(){
+
+        return true;
+    }
+
+    private boolean hasTheWinner(){
+
+        return false;
+    }
     public void start(){
         init();
           
@@ -75,6 +98,7 @@ public class Game{
                 for(GamePlayer player : players){
                     GameSnapshot nowGameSnapshot = (GameSnapshot)(gameHistory.get(gameHistory.size()-1).clone());
                     int numberOfThisPlayer = players.indexOf(player);
+                    
                     //send breadcast message to other client
                     for(int i = 0 ; i < players.size() ; i++){
                         if(i == numberOfThisPlayer){
@@ -109,40 +133,65 @@ public class Game{
                     while(true){
                         
                         //generate the data pack that will send to client
-                        GameInfo gameInfo = new GameInfo();
-                        gameInfo.sender = "server";
-                        gameInfo.message = GameMessage.YOUR_TURN;
-                        gameInfo.copy = nowGameSnapshot;
-                        gameInfo.copy.cardPile = new ArrayList<Card>();
-                        gameInfo.copy.hands = new ArrayList<ArrayList<Card>>();
-                        gameInfo.remainCardPileNumber = cardPile.size();
-                        gameInfo.isBreakedTheIce = player.isBreakedTheIce;
-                        gameInfo.playersHand = (ArrayList<Card>)player.hand.clone();
-                        player.oos.writeObject(gameInfo);
+                        player.oos.writeObject(generateServerToClientGameInfo(GameMessage.YOUR_TURN,player));
                         //Thread.sleep(5000);
 
 
                         GameInfo replygameInfo = (GameInfo)player.ois.readObject();
                         if(replygameInfo.playerMovement == PlayerMovement.Pick_One_Card){
+                            Card c = cardPile.get(0);
+                            cardPile.remove(c);
+                            player.hand.add(c);
 
+                            player.oos.writeObject(generateServerToClientGameInfo(GameMessage.YOUR_TURN,player));
+
+                            break myTerm;
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Move_One_Card){
-
+                            cardGroup = (ArrayList<ArrayList<Card>>)replygameInfo.copy.cardGroups.clone();
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Out_Of_A_Card){
-
+                            cardGroup = (ArrayList<ArrayList<Card>>)replygameInfo.copy.cardGroups.clone();
+                            player.hand = (ArrayList<Card>)replygameInfo.playersHand.clone();
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Confirm){
+                            if(checkTheMovement()){
+                                if(hasTheWinner()){
+                                    numberOfThisPlayer = players.indexOf(player);
+                    
+                                    //send breadcast message to other client
+                                    for(int i = 0 ; i < players.size() ; i++){
+                                        if(i == numberOfThisPlayer){
+                                            player.oos.writeObject(generateServerToClientGameInfo(GameMessage.YOU_WIN,player));
+                                        }
+                                        player.oos.writeObject(generateServerToClientGameInfo(GameMessage.YOU_LOSE,player));
+                                    }
+                                    break outer;
+                                }
+                                player.oos.writeObject(generateServerToClientGameInfo(GameMessage.CONFIRM_OK,player));
+                                break myTerm;
+                            }
+                            else{
+                                player.oos.writeObject(generateServerToClientGameInfo(GameMessage.CONFIRM_FAIL,player));
 
+                            }
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Roll_Back){
-
+                            cardPile = (ArrayList<Card>)nowGameSnapshot.cardPile.clone();
+                            cardGroup= (ArrayList<ArrayList<Card>>)nowGameSnapshot.cardGroups.clone();
+                            player.hand = (ArrayList<Card>)nowGameSnapshot.hands.get(numberOfThisPlayer).clone();
                         }
                         else{
                             throw new Exception();
                         }
+
+
                     }
+
+                    gameHistory.add(new GameSnapshot(cardPile , cardGroup , players));
+
                 }
+                shutdown();
             }
             
             

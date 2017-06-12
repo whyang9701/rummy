@@ -6,4 +6,6 @@ enum GameMessage{
     PLAYER2s_TURN,
     PLAYER3s_TURN,
     PLAYER4s_TURN,
+    CONFIRM_OK,
+    CONFIRM_FAIL,
 }
