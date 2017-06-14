@@ -5,7 +5,7 @@ public class Game{
 //this class designed for implementing rummikub game logic;
 
     ArrayList<Card> cardPile = new ArrayList<>();
-    ArrayList<ArrayList<Card>> cardGroup = new ArrayList<>();
+    ArrayList<ArrayList<Card>> cardGroups = new ArrayList<>();
     ArrayList<GameSnapshot> gameHistory = new ArrayList<>();
     ArrayList<GamePlayer> players = new ArrayList<>();
     int playerNum = 0;
@@ -61,7 +61,7 @@ public class Game{
         GameInfo gameInfo = new GameInfo();
         gameInfo.sender = "server";
         gameInfo.message = message;
-        gameInfo.copy = new GameSnapshot(cardPile,cardGroup,players);
+        gameInfo.copy = new GameSnapshot(cardPile,cardGroups,players);
         gameInfo.copy.cardPile = new ArrayList<Card>();
         gameInfo.copy.hands = new ArrayList<ArrayList<Card>>();
         gameInfo.remainCardPileNumber = cardPile.size();
@@ -71,33 +71,110 @@ public class Game{
 
     }
 
-    private boolean checkTheMovement(){
+    private boolean isTheMovementLegally(GamePlayer player,GameSnapshot nowGameSnapshot){
+        //todo
+        return true;
+        
+        
+        
+        // int indexOfThisPlayer = players.indexOf(player);
+        // boolean playersHandHasChange  = (player.hand.size() != nowGameSnapshot.hands.get(indexOfThisPlayer).size());
+        // //if hand never change then this step is illegal
+        // if(!playersHandHasChange){ 
+        //     return false;
+        // }
+        // else{
+        //     if(!isAllCardGroupsLegally()){
+        //         return false;
+        //     }
+        // }
+        // return true;
+    }
 
+    private boolean isAllCardGroupsLegally(){
+        for(ArrayList<Card> cardGroup : cardGroups){
+            int numberOfSmileCards = 0;
+            for(Card card : cardGroup){
+                if(card.color == CardColor.SMILE){
+                    numberOfSmileCards ++;
+                }
+            }
+            //same color and number is continuous
+            if(isCardsSameColor(cardGroup)){
+
+            }
+             //same number but all card different color
+            else{
+                int targetNumber = cardGroup.get(0).number;
+                for(Card card : cardGroup){
+                    if(card.color == CardColor.SMILE){
+                        //the smile does not join this judgement
+                        continue;
+                    }
+                    if(card.number != targetNumber){
+                        //the numbers are differerent
+                        return false;
+                    }
+                }
+                //this data structure can't add the same thing which has been added 
+                HashSet<CardColor> set = new HashSet<CardColor>();
+                for(Card card :cardGroup){
+                    set.add(card.color);
+                }
+                if(numberOfSmileCards == 0 || numberOfSmileCards == 1){
+                    if(set.size() != cardGroup.size()){
+                    //if this two number not the same means there are duplicate color in card group
+                    return false;
+                    }
+                }
+                else if (numberOfSmileCards == 2){
+                    //add one meas two smile be two different color
+                    if(set.size()+1 != cardGroup.size()){
+                        return false;
+                    }
+                }
+                else{
+                    //never be excuted segment
+                    return false;
+                }
+                
+
+            }
+           
+
+            
+        }
         return true;
     }
 
+    private boolean isCardsSameColor(ArrayList<Card> cards){
+        CardColor targetColor = cards.get(0).color;
+        for(Card card:cards){
+            if(card.color == CardColor.SMILE){
+                continue;
+            }
+            if(targetColor != card.color){
+                return false;
+            }
+        }
+        return true;
+    }
     private boolean hasTheWinner(){
-
+        // if cardpile have no card
+        if(cardPile.size() == 0){
+            return true;
+        }
+        //if somebody has use all cards
+        for(GamePlayer player : players){
+            if(player.hand.size() == 0){
+                return true;
+            }
+        }
         return false;
     }
-    public void start(){
-        init();
-          
-        deal();
-        
-        GameSnapshot snapshot = new GameSnapshot(cardPile , cardGroup , players);
-        gameHistory.add(snapshot);
-        System.out.println("the game is start with the condition below \n");
-        System.out.println(snapshot);
-        
-        //this loop represent the whole game proccess will go through
-        outer:
-        while(true){
-            try{
-                //this loop represent the game will switch term in game players
-                for(GamePlayer player : players){
-                    GameSnapshot nowGameSnapshot = (GameSnapshot)(gameHistory.get(gameHistory.size()-1).clone());
-                    int numberOfThisPlayer = players.indexOf(player);
+
+    private void broadcastTheMyTurnMessase(GamePlayer player) throws IOException{
+        int numberOfThisPlayer = players.indexOf(player);
                     
                     //send breadcast message to other client
                     for(int i = 0 ; i < players.size() ; i++){
@@ -127,6 +204,28 @@ public class Game{
                             players.get(i).oos.writeObject(gameInfo);
                         }
                     }
+    }
+    public void start(){
+        init();
+          
+        deal();
+        
+        GameSnapshot snapshot = new GameSnapshot(cardPile , cardGroups , players);
+        gameHistory.add(snapshot);
+        System.out.println("the game is start with the condition below \n");
+        System.out.println(snapshot);
+        
+        //this loop represent the whole game proccess will go through
+        outer:
+        while(true){
+            try{
+                //this loop represent the game will switch term in game players
+                for(GamePlayer player : players){
+                    GameSnapshot nowGameSnapshot = (GameSnapshot)(gameHistory.get(gameHistory.size()-1).clone());
+                    int numberOfThisPlayer = players.indexOf(player);
+                    
+                    //send breadcast message to other client
+                    broadcastTheMyTurnMessase(player);
                     
                     // this loop represent every player has unlimited chance to move
                     myTerm:
@@ -148,14 +247,14 @@ public class Game{
                             break myTerm;
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Move_One_Card){
-                            cardGroup = (ArrayList<ArrayList<Card>>)replygameInfo.copy.cardGroups.clone();
+                            cardGroups = (ArrayList<ArrayList<Card>>)replygameInfo.copy.cardGroups.clone();
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Out_Of_A_Card){
-                            cardGroup = (ArrayList<ArrayList<Card>>)replygameInfo.copy.cardGroups.clone();
+                            cardGroups = (ArrayList<ArrayList<Card>>)replygameInfo.copy.cardGroups.clone();
                             player.hand = (ArrayList<Card>)replygameInfo.playersHand.clone();
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Confirm){
-                            if(checkTheMovement()){
+                            if(isTheMovementLegally(player,nowGameSnapshot)){
                                 if(hasTheWinner()){
                                     numberOfThisPlayer = players.indexOf(player);
                     
@@ -178,7 +277,7 @@ public class Game{
                         }
                         else if(replygameInfo.playerMovement == PlayerMovement.Roll_Back){
                             cardPile = (ArrayList<Card>)nowGameSnapshot.cardPile.clone();
-                            cardGroup= (ArrayList<ArrayList<Card>>)nowGameSnapshot.cardGroups.clone();
+                            cardGroups = (ArrayList<ArrayList<Card>>)nowGameSnapshot.cardGroups.clone();
                             player.hand = (ArrayList<Card>)nowGameSnapshot.hands.get(numberOfThisPlayer).clone();
                         }
                         else{
@@ -188,10 +287,10 @@ public class Game{
 
                     }
 
-                    gameHistory.add(new GameSnapshot(cardPile , cardGroup , players));
+                    gameHistory.add(new GameSnapshot(cardPile , cardGroups , players));
 
                 }
-                shutdown();
+                this.shutdown();
             }
             
             
