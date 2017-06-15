@@ -21,6 +21,7 @@ public class GameClient {
         try {
             server = new Socket(host, port);
             System.out.println("The connection is successful.");
+            System.out.println("Waiting for other players...");
 
             oos = new ObjectOutputStream(server.getOutputStream());
             ois = new ObjectInputStream(server.getInputStream());
@@ -32,7 +33,7 @@ public class GameClient {
         while (true){
             try {
                 readgameinfo();
-
+                int lastplayer=0;
                 if(gameInfo.message == GameMessage.YOUR_TURN){
                     System.out.println("It's your turn =D"); //your turn
 
@@ -41,7 +42,7 @@ public class GameClient {
                     System.out.println("Second,enter the color of the card,split them with blank space.");
                     System.out.println("");
 
-                    System.out.println(">>Number of cards in the card pile : " + gameInfo.remainCardPileNumber); //cardpile
+                    System.out.println(">>Number of cards in the card pile : " + gameInfo.remainCardPileNumber +"\n"); //cardpile
 
                     
                     showcardgroups(); //card groups
@@ -60,12 +61,13 @@ public class GameClient {
                     boolean inputck2=false;
                     boolean inputck3=false;
 
-                   
                     System.out.println("Please enter your movement : "); //first movement choice
                     System.out.println("0=Draw a card,1=Play cards");
                     
+                    
                     while(!complete)
                     {
+                        
                         in();
 
                         if(input.compareToIgnoreCase("0") == 0){  //draw a card
@@ -73,9 +75,17 @@ public class GameClient {
                             gameInfo.playerMovement=PlayerMovement.Pick_One_Card;
                             writegameinfo();
                             readgameinfo();
+                            System.out.println("This turn ends.");
+                            showhands();
+                            /*gameInfo.playerMovement=PlayerMovement.Confirm;
+                            writegameinfo();
+                            readgameinfo();
+                            */
+                            break;
                         }
 
-                        if(input.compareToIgnoreCase("1") == 0){ //got cards to play
+                        else if(input.compareToIgnoreCase("1") == 0){ //got cards to play
+                            int cardplayedtotalnumber = 0;
                             int originalhandsnumber=gameInfo.playersHand.size();
                             int cardplace=0;
                             int cardgroup=0;
@@ -94,16 +104,17 @@ public class GameClient {
                                     
                                     while(!rightcardtoplayandplace)  //get card and place
                                     {
-                                        System.out.println("Which card would you play? "); //which card
-                                        System.out.println("(The one in the first row on the far left is card 0,and so on.");
-                                        input=scanner.next();
+                                        
+                                        System.out.println("Which card would you like to play? "); //which card
+                                        System.out.println("(The card on the top is card 0,and so on.)");
+                                        in();
                                         cardplace = ti();
 
                                         while(cardplace<0 || cardplace>=gameInfo.playersHand.size()) //QvQ
                                         {
                                             plz();
                                             in();
-                                            cardplace = Integer.parseInt(input);
+                                            cardplace = ti();
                                         }
 
                                         System.out.println("Which group do you want to place this card?"); //which group
@@ -122,7 +133,7 @@ public class GameClient {
                                         while(true)
                                         {
                                             in();
-                                            if(input.compareToIgnoreCase("0") == 1){
+                                            if(input.compareToIgnoreCase("1") == 0){
                                                 rightcardtoplayandplace=true;
                                                 break;
                                             } 
@@ -135,26 +146,31 @@ public class GameClient {
                                         }
 
                                     }  //right card and place
-                                    if(cardgroup==-1){
-                                        cardgroup=gameInfo.copy.cardGroups.size();
+                                    if(cardgroup==-1){  //create new card group
+                                        gameInfo.copy.cardGroups.add(new ArrayList<Card>());
+                                        cardgroup=gameInfo.copy.cardGroups.size()-1;
                                     }
-                                    cardtoplay=gameInfo.playersHand.get(cardplace);
-                                    gameInfo.copy.cardGroups.get(cardgroup).add(cardtoplay);
-                                    if(cardtoplay.color!=CardColor.SMILE){
+                                    cardtoplay=gameInfo.playersHand.get(cardplace);  //get card to play
+                                    gameInfo.copy.cardGroups.get(cardgroup).add(cardtoplay);  //add card to play
+                                    gameInfo.playersHand.remove(cardplace); //delete card to play in hands
+
+                                    if(cardtoplay.color!=CardColor.SMILE){  //sort
                                         sort(cardgroup);
                                     }
                                     else{
-                                        sortjoker(cardgroup);
+                                        sortjoker(cardgroup);  //sort joker
                                     }
+
+                                    gameInfo.playerMovement=PlayerMovement.Out_Of_A_Card;  //send gameinfo
                                     writegameinfo();
                                     readgameinfo();
-                                    System.out.println("Card played.");
-
+                                    System.out.println("\n"+"Card played."+"\n");
+                                    cardplayedtotalnumber+=cardtoplay.number;
                                     showcardgroups();
                                     showhands();
 
                                 }
-                                if(input.compareToIgnoreCase("1") == 0){ //move a card
+                                else if(input.compareToIgnoreCase("1") == 0){ //move a card
                                     gameInfo.playerMovement=PlayerMovement.Move_One_Card;
                                     writegameinfo();
                                     readgameinfo();
@@ -165,8 +181,8 @@ public class GameClient {
                                     Card cardtomove=null;
                                     int cardtomoveindex=-1;
                                     if(!gameInfo.isBreakedTheIce){ //check ice
-                                        System.out.println("Sorry,you can't move cards before you had breaked the ice.");
-                                        break;
+                                        System.out.println("Sorry,you can't move cards before you had breaked the ice."+"\n");
+                                        continue;
                                     } //check ice end
 
                                     boolean rightcardtomove=false; 
@@ -192,7 +208,7 @@ public class GameClient {
                                             cardtomovecolor=getcolor(input);
                                             if(cardtomovecolor!=CardColor.SMILE){  //QvQ
                                                 if(cardtomovenumber<=0 ||cardtomovenumber>13){
-                                                    System.out.println("Illegal card number or color,please try again.");
+                                                    System.out.println("Illegal card number or color,please try again."+"\n");
                                                     inputck1=false;
                                                     break;
                                                 }
@@ -218,9 +234,10 @@ public class GameClient {
 
                                         while(!inputck1){
                                             System.out.println("Which card group would you like to place this card?");
+                                            System.out.println("(-1=a new group)");
                                             in();
                                             togroup=ti();
-                                            while(fromgroup<0 || fromgroup>=gameInfo.copy.cardGroups.size())
+                                            while(togroup<-1 || togroup>=gameInfo.copy.cardGroups.size())
                                             {
                                                 plz();
                                                 in();
@@ -233,7 +250,7 @@ public class GameClient {
                                         while(true)  //QvQ
                                         {
                                             in();
-                                            if(input.compareToIgnoreCase("0") == 1){
+                                            if(input.compareToIgnoreCase("1") == 0){
                                                 rightcardtomove=true;
                                                 break;
                                             } 
@@ -255,9 +272,14 @@ public class GameClient {
                                     }
                                 }
 
-                                if(input.compareToIgnoreCase("2") == 0){  //end move
+                                else if(input.compareToIgnoreCase("2") == 0){  //end move
                                     if(gameInfo.playersHand.size()==originalhandsnumber){
                                         System.out.println("Sorry,you cannot end your movement without playing any card.");
+                                        plz();
+                                    }
+                                    else if(!gameInfo.isBreakedTheIce && cardplayedtotalnumber<30){
+                                        System.out.println("Sorry,the total number of cards you played must be greater or equal to 30 to break the ice.");
+                                        plz();
                                     }
                                     else{
                                         System.out.println("Are you sure you have complete all movements?");
@@ -265,21 +287,28 @@ public class GameClient {
                                         while(true)  //QvQ
                                         {
                                             in();
-                                            if(input.compareToIgnoreCase("0") == 1){
+                                            if(input.compareToIgnoreCase("1") == 0){
                                                 gameInfo.playerMovement=PlayerMovement.Confirm;
                                                 writegameinfo();
                                                 readgameinfo();
                                                 if(gameInfo.message==GameMessage.CONFIRM_FAIL){
                                                     System.out.println("Sorry,there are some illegal card groups,please alter them.");
+                                                    readgameinfo
+                                                    ();
                                                     break;
                                                 }
                                                 else if(gameInfo.message==GameMessage.CONFIRM_OK){
+                                                    playcardcomplete=true;
                                                     complete=true;
                                                     System.out.println("This turn ends.");
+                                                    
                                                     showhands();
                                                     break;
                                                 }
-                                                
+                                                else if(gameInfo.message==GameMessage.YOU_WIN){
+                                                    System.out.println("\n"+"You win.");
+                                                    System.exit(1);
+                                                }
                                                 break;
                                             } 
                                             else if(input.compareToIgnoreCase("0") == 0){
@@ -290,17 +319,17 @@ public class GameClient {
                                     }
                                 }
 
-                                if(input.compareToIgnoreCase("3") == 0){
+                                else if(input.compareToIgnoreCase("3") == 0){
                                     System.out.println("All movement in this turn will reset,are you sure that you want to roll back?");
                                     System.out.println("0=No,1=Yes.");
                                     while(true)  //QvQ
                                     {
                                         in();
-                                        if(input.compareToIgnoreCase("0") == 1){
+                                        if(input.compareToIgnoreCase("1") == 0){
                                             gameInfo.playerMovement=PlayerMovement.Roll_Back;
                                             writegameinfo();
-                                            readgameinfo();
                                             rollback=true;
+                                            playcardcomplete=true;
                                             complete=true;
                                             break;
                                         } 
@@ -313,15 +342,14 @@ public class GameClient {
                                 else plz();
                             }
                         }
-                        else if(input == null){
-                            
-                        }
+
                         else plz();
 
                     }
                     if(rollback){
-                        System.out.println("Restart this turn : ");
-                        continue;
+                        System.out.println("\n"+"Restart this turn : "+"\n");
+                        rollback=false;
+                        complete=false;
                     }
                 }
                 else if(gameInfo.message==GameMessage.PLAYER1s_TURN){
@@ -339,6 +367,10 @@ public class GameClient {
                 else if(gameInfo.message==GameMessage.PLAYER4s_TURN){
                     System.out.println("It's player4's turn.");
                 }
+                else if(gameInfo.message==GameMessage.YOU_LOSE){
+                    System.out.println("\n"+"player"+lastplayer+" wins.");
+                    System.out.println("You lose.");
+                }
                 else {System.out.println("Error.");};
 
             }catch (Exception e) {
@@ -355,13 +387,19 @@ public class GameClient {
     public void showcardgroups(){
         System.out.println(">>Card groups : ");  //cardgroup
         int cardgroupnumbering=0;
+        int cardsingroupnumbering=0;
         String s="";
         for(ArrayList<Card> group : gameInfo.copy.cardGroups)
         {
+            cardsingroupnumbering=0;
             s+="(" + Integer.toString(cardgroupnumbering)+ ") " ;
             for(Card card : group)
             {
-                s += card.toString() + ",";
+                cardsingroupnumbering++;
+                s += card.toString() ;
+                if(cardsingroupnumbering!=group.size()){
+                    s += ",";
+                }
                             
             }
             cardgroupnumbering++;
@@ -371,6 +409,7 @@ public class GameClient {
     }
 
     public void showhands(){
+        sorthands();
         System.out.println(">>Your hands : "); //playerhands
         String s="";
         int handsnumbering=0;
@@ -386,15 +425,66 @@ public class GameClient {
         System.out.println(s);
     }
 
+    public void sorthands(){
+        Card temp=null;
+        int handsnumber=gameInfo.playersHand.size();
+        for(int i=0;i<handsnumber;i++){  //sort number
+            for(int j=0;j<handsnumber-i-1;j++){
+                if(gameInfo.playersHand.get(j).number < gameInfo.playersHand.get(j+1).number){
+                    Collections.swap(gameInfo.playersHand,j,j+1);
+                }
+            }
+        }
+
+        // sort color
+        for(int i=0;i<handsnumber;i++){
+            if(gameInfo.playersHand.get(i).color==CardColor.GREEN){
+                temp=gameInfo.playersHand.get(i);
+                gameInfo.playersHand.add(0,temp);
+                gameInfo.playersHand.remove(i+1);
+            }
+        }
+        for(int i=0;i<handsnumber;i++){
+            if(gameInfo.playersHand.get(i).color==CardColor.BLUE){
+                temp=gameInfo.playersHand.get(i);
+                gameInfo.playersHand.add(0,temp);
+                gameInfo.playersHand.remove(i+1);
+            }
+        }
+        for(int i=0;i<handsnumber;i++){
+            if(gameInfo.playersHand.get(i).color==CardColor.YELLOW){
+                temp=gameInfo.playersHand.get(i);
+                gameInfo.playersHand.add(0,temp);
+                gameInfo.playersHand.remove(i+1);
+            }
+        }
+        for(int i=0;i<handsnumber;i++){
+            if(gameInfo.playersHand.get(i).color==CardColor.RED){
+                temp=gameInfo.playersHand.get(i);
+                gameInfo.playersHand.add(0,temp);
+                gameInfo.playersHand.remove(i+1);
+            }
+        }
+        /*gameInfo.playerMovement=PlayerMovement.Out_Of_A_Card;
+        writegameinfo();
+        readgameinfo();*/
+    }
+
     public void in()
     {
-        if(scanner.hasNext()){
-            input = scanner.next();
+        while (true) {
+            if (scanner.hasNext()) {
+                input = scanner.next();
+                break;
+            }
         }
+        /*if(scanner.hasNext()){
+            input = scanner.next();
+        }*/
     }
     public void plz()
     {
-        System.out.println("Pleae try again.");
+        System.out.println("Pleae try again."+"\n");
     }
     public int ti(){
         return Integer.parseInt(input);
@@ -431,10 +521,10 @@ public class GameClient {
     }
     public void writegameinfo() {
         try{
-             oos.writeObject(gameInfo);
+            oos.writeObject(gameInfo);
         }
         catch(Exception e){
-            System.out.println("Got something wrong QAQ");
+            System.out.println("Have trouble with sending game information.");
         }
         
     }
@@ -511,7 +601,7 @@ public class GameClient {
         return;
     }
 
-    public void sortjoker (int group){  ///////////////////////////
+    public void sortjoker (int group){  
         if(ispair(group)) return;
         int putindex=0;
         int cardplayedindex=gameInfo.copy.cardGroups.get(group).size()-1;        
@@ -565,12 +655,7 @@ public class GameClient {
                     }
                 }
             }
-            /*else if(i==0){  //i is first
-                if(gameInfo.copy.cardGroups.get(group).get(i).number >= gameInfo.copy.cardGroups.get(group).get(cardplayedindex).number){
-                        putindex=1; 
-                        break;
-                }
-            }*/
+            
             else if(i+1<=cardingroupnumber){//no 0,no end,check
                 if(gameInfo.copy.cardGroups.get(group).get(i+1).number-1 != gameInfo.copy.cardGroups.get(group).get(i).number){
                     lackindex=i+1; 
