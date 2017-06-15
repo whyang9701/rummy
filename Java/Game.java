@@ -16,6 +16,7 @@ public class Game {
     }
 
     private void init() {
+        
         for (int j = 0; j < 2; j++) {
             for (int i = 1; i <= 13; i++) {
                 cardPile.add(new Card(i, CardColor.RED));
@@ -37,17 +38,15 @@ public class Game {
         Random random = new Random();
         for (int i = 0; i < 106; i++) {
             Card card1 = cardPile.get(random.nextInt(106));
-            Card card2 = cardPile.get(random.nextInt(106));
             cardPile.remove(card1);
-            cardPile.remove(card2);
             cardPile.add(card1);
-            cardPile.add(card2);
         }
-
+        
     }
 
     private void deal() {
         //deal
+        
         for (int i = 0; i < 14; i++) {
             for (GamePlayer player : players) {
                 Card card = cardPile.get(0);
@@ -55,6 +54,7 @@ public class Game {
                 player.hand.add(card);
             }
         }
+        
     }
 
     private GameInfo generateServerToClientGameInfo(GameMessage message, GamePlayer player) {
@@ -113,13 +113,18 @@ public class Game {
     private boolean isAllCardGroupsLegally() {
         for (ArrayList<Card> cardGroup : cardGroups) {
             int numberOfSmileCards = 0;
+            //get number of smile cards
             for (Card card : cardGroup) {
                 if (card.color == CardColor.SMILE) {
                     numberOfSmileCards++;
                 }
+                
             }
             //same color and number is continuous
             if (isCardsSameColor(cardGroup)) {
+                if(cardGroup.size()>=14){
+                    return false;
+                }
                 ArrayList<Card> cardGroupCopy = (ArrayList<Card>)cardGroup.clone();
                 //smile card do not need to join sort
                 for(int i = 0 ; i< cardGroupCopy.size() ; i++){
@@ -140,6 +145,9 @@ public class Game {
             }
             //same number but all card different color
             else {
+                if(cardGroup.size() >= 5){
+                    return false;
+                }
                 int targetNumber = cardGroup.get(0).number;
                 for (Card card : cardGroup) {
                     if (card.color == CardColor.SMILE) {
@@ -192,17 +200,19 @@ public class Game {
     }
 
     private boolean hasTheWinner() {
+        //todo
+        return true;
         // if cardpile have no card
-        if (cardPile.size() == 0) {
-            return true;
-        }
-        //if somebody has use all cards
-        for (GamePlayer player : players) {
-            if (player.hand.size() == 0) {
-                return true;
-            }
-        }
-        return false;
+        // if (cardPile.size() == 0) {
+        //     return true;
+        // }
+        // //if somebody has use all cards
+        // for (GamePlayer player : players) {
+        //     if (player.hand.size() == 0) {
+        //         return true;
+        //     }
+        // }
+        // return false;
     }
 
     private void broadcastTheMyTurnMessase(GamePlayer player) throws IOException {
@@ -236,6 +246,7 @@ public class Game {
             }
         }
     }
+
 
     public void start() {
         init();
@@ -292,9 +303,12 @@ public class Game {
                                         if (i == numberOfThisPlayer) {
                                             player.oos.writeObject(
                                                     generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
+                                            System.out.println("player"+numberOfThisPlayer+"  win the game");
+                                            continue;
                                         }
                                         player.oos.writeObject(
                                                 generateServerToClientGameInfo(GameMessage.YOU_LOSE, player));
+                                                System.out.println("player"+i+"  lose the game");
                                     }
                                     break outer;
                                 }

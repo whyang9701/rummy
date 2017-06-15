@@ -77,10 +77,7 @@ public class GameClient {
                             readgameinfo();
                             System.out.println("This turn ends.");
                             showhands();
-                            /*gameInfo.playerMovement=PlayerMovement.Confirm;
-                            writegameinfo();
-                            readgameinfo();
-                            */
+                            
                             break;
                         }
 
@@ -95,7 +92,7 @@ public class GameClient {
                             while(!playcardcomplete)
                             {
                                 System.out.println("Please enter your movement : "); //second movement choice
-                                System.out.println("0=play a card,1=Move a card,2=End your movement,3=roll back");
+                                System.out.println("0=Play a card,1=Move a card,2=End your movement,3=Roll back");
                                 in();
 
                                 if(input.compareToIgnoreCase("0") == 0) //play a card
@@ -127,8 +124,15 @@ public class GameClient {
                                             in();
                                             cardgroup = ti();
                                         }
-                                        System.out.println("put "+gameInfo.playersHand.get(cardplace).toString()+" to the ("+cardgroup+")group,is that right?" );
-                                        System.out.println("0=No,1=Yes.");
+                                        if(cardgroup!=-1){
+                                            System.out.println("put "+gameInfo.playersHand.get(cardplace).toString()+" to group"+cardgroup+",is that right?" );
+                                            System.out.println("0=No,1=Yes.");
+                                        }
+                                        else{
+                                            System.out.println("put "+gameInfo.playersHand.get(cardplace).toString()+" to a new group ,is that right?" );
+                                            System.out.println("0=No,1=Yes.");
+                                        }
+                                        
                                         
                                         while(true)
                                         {
@@ -182,6 +186,7 @@ public class GameClient {
                                     int cardtomoveindex=-1;
                                     if(!gameInfo.isBreakedTheIce){ //check ice
                                         System.out.println("Sorry,you can't move cards before you had breaked the ice."+"\n");
+                                        plz();
                                         continue;
                                     } //check ice end
 
@@ -198,8 +203,7 @@ public class GameClient {
                                         }
 
                                         
-                                        //////System.out.println("(Please enter the number and then color of the card,");
-                                        //////System.out.println("split them with a blank space.)");
+                                        
                                         while(!inputck1){    //which card
                                             System.out.println("Which card in this group would you like to move?"); //which card
                                             in();
@@ -465,9 +469,7 @@ public class GameClient {
                 gameInfo.playersHand.remove(i+1);
             }
         }
-        /*gameInfo.playerMovement=PlayerMovement.Out_Of_A_Card;
-        writegameinfo();
-        readgameinfo();*/
+        
     }
 
     public void in()
@@ -478,9 +480,7 @@ public class GameClient {
                 break;
             }
         }
-        /*if(scanner.hasNext()){
-            input = scanner.next();
-        }*/
+        
     }
     public void plz()
     {
@@ -596,8 +596,7 @@ public class GameClient {
         }
         gameInfo.copy.cardGroups.get(group).add(putindex,newcard);
         gameInfo.copy.cardGroups.get(group).remove(cardplayedindex+1);
-        writegameinfo();
-        readgameinfo();
+        
         return;
     }
 
@@ -615,9 +614,18 @@ public class GameClient {
         }
         gameInfo.copy.cardGroups.get(group).add(putindex,newcard);
         gameInfo.copy.cardGroups.get(group).remove(cardplayedindex+1);
-        writegameinfo();
-        readgameinfo();
+        
         return ;
+    }
+
+    public void organizecardpile(){
+        int groupindex=0;
+        for(ArrayList<Card> group : gameInfo.copy.cardGroups){
+            if(group.size()==0){
+                gameInfo.copy.cardGroups.remove(groupindex);
+            }
+            groupindex++;
+        }
     }
 
 

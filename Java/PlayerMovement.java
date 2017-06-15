@@ -1,5 +1,4 @@
-//玩家動作枚舉
-//所有可能執行的動作只有下列幾種
+//all movement that player can do
 enum PlayerMovement{
     Pick_One_Card,
     Move_One_Card,
