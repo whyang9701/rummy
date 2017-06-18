@@ -326,25 +326,25 @@ public class Game {
 
         //todo ---------------this segment is for test-------------------------
         // i want to manually asign cards
-        HashSet<Integer> set = new HashSet<>();
-        System.out.println(set.add(1));
-        System.out.println(set.add(1));
-        for (int j = 0; j < 2; j++) {
-            for (int i = 1; i <= 13; i++) {
-                cardPile.add(new Card(i, CardColor.RED));
-            }
-            for (int i = 1; i <= 13; i++) {
-                cardPile.add(new Card(i, CardColor.YELLOW));
-            }
-            for (int i = 1; i <= 13; i++) {
-                cardPile.add(new Card(i, CardColor.BLUE));
-            }
-            for (int i = 1; i <= 13; i++) {
-                cardPile.add(new Card(i, CardColor.GREEN));
-            }
-        }
-        cardPile.add(new Card(0, CardColor.SMILE));
-        cardPile.add(new Card(0, CardColor.SMILE));
+        // HashSet<Integer> set = new HashSet<>();
+        // System.out.println(set.add(1));
+        // System.out.println(set.add(1));
+        // for (int j = 0; j < 2; j++) {
+        //     for (int i = 1; i <= 13; i++) {
+        //         cardPile.add(new Card(i, CardColor.RED));
+        //     }
+        //     for (int i = 1; i <= 13; i++) {
+        //         cardPile.add(new Card(i, CardColor.YELLOW));
+        //     }
+        //     for (int i = 1; i <= 13; i++) {
+        //         cardPile.add(new Card(i, CardColor.BLUE));
+        //     }
+        //     for (int i = 1; i <= 13; i++) {
+        //         cardPile.add(new Card(i, CardColor.GREEN));
+        //     }
+        // }
+        // cardPile.add(new Card(0, CardColor.SMILE));
+        // cardPile.add(new Card(0, CardColor.SMILE));
         players.get(0).hand = new ArrayList<Card>();
         players.get(1).hand = new ArrayList<Card>();
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
@@ -356,6 +356,7 @@ public class Game {
         players.get(1).hand.add(new Card(10, CardColor.YELLOW));
         players.get(1).hand.add(new Card(11, CardColor.YELLOW));
         players.get(1).hand.add(new Card(12, CardColor.YELLOW));
+        players.get(1).hand.add(new Card(0, CardColor.SMILE));
         //---------------this segment is for test-------------------------
 
         GameSnapshot snapshot = new GameSnapshot(cardPile, cardGroups, players);
@@ -418,6 +419,7 @@ public class Game {
                                                 generateServerToClientGameInfo(GameMessage.YOU_LOSE, player));
                                         System.out.println("player" + i + "  lose the game");
                                     }
+                                    Thread.sleep(1000); // wait for client receive
                                     break outer;
                                 }
                                 player.oos.writeObject(generateServerToClientGameInfo(GameMessage.CONFIRM_OK, player));

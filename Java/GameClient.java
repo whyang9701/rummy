@@ -342,7 +342,7 @@ public class GameClient {
                                                         break;
                                                     } else if (gameInfo.message == GameMessage.YOU_WIN) {
                                                         System.out.println("\n" + "You win.");
-                                                        System.exit(1);
+                                                        closeProgram();
                                                     }
                                                     break;
                                                 } else if (input.compareToIgnoreCase("0") == 0) {
@@ -376,7 +376,7 @@ public class GameClient {
                                                     break;
                                                 } else if (gameInfo.message == GameMessage.YOU_WIN) {
                                                     System.out.println("\n" + "You win.");
-                                                    System.exit(1);
+                                                    closeProgram();
                                                 }
                                                 break;
                                             } else if (input.compareToIgnoreCase("0") == 0) {
@@ -437,11 +437,11 @@ public class GameClient {
                 } else if (gameInfo.message == GameMessage.YOU_LOSE) {
                     System.out.println("\n" + "player" + lastplayer + " wins.");
                     System.out.println("You lose.");
-                    System.exit(1);
+                    closeProgram();
                 } else {
                     System.out.println("Error.");
                 }
-                ;
+                
 
             } catch (Exception e) {
                 System.out.println("Got something wrong QAQ");
