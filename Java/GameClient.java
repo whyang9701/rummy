@@ -574,6 +574,7 @@ public class GameClient {
             gameInfo = (GameInfo) ois.readObject();
         } catch (Exception e) {
             System.out.println("Fail to get game information.");
+            e.printStackTrace();
             closeProgram();
         }
 

@@ -345,18 +345,18 @@ public class Game {
         // }
         // cardPile.add(new Card(0, CardColor.SMILE));
         // cardPile.add(new Card(0, CardColor.SMILE));
-        players.get(0).hand = new ArrayList<Card>();
-        players.get(1).hand = new ArrayList<Card>();
+        // players.get(0).hand = new ArrayList<Card>();
+        // players.get(1).hand = new ArrayList<Card>();
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
-        players.get(0).hand.add(new Card(13, CardColor.RED));
-        players.get(0).hand.add(new Card(13, CardColor.GREEN));
-        players.get(0).hand.add(new Card(13, CardColor.BLUE));
-        players.get(0).hand.add(new Card(13, CardColor.YELLOW));
-        players.get(1).hand.add(new Card(10, CardColor.YELLOW));
-        players.get(1).hand.add(new Card(11, CardColor.YELLOW));
-        players.get(1).hand.add(new Card(12, CardColor.YELLOW));
-        players.get(1).hand.add(new Card(0, CardColor.SMILE));
+        // players.get(0).hand.add(new Card(13, CardColor.RED));
+        // players.get(0).hand.add(new Card(13, CardColor.GREEN));
+        // players.get(0).hand.add(new Card(13, CardColor.BLUE));
+        // players.get(0).hand.add(new Card(13, CardColor.YELLOW));
+        // players.get(1).hand.add(new Card(10, CardColor.YELLOW));
+        // players.get(1).hand.add(new Card(11, CardColor.YELLOW));
+        // players.get(1).hand.add(new Card(12, CardColor.YELLOW));
+        // players.get(1).hand.add(new Card(0, CardColor.SMILE));
         //---------------this segment is for test-------------------------
 
         GameSnapshot snapshot = new GameSnapshot(cardPile, cardGroups, players);
