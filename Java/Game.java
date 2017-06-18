@@ -287,6 +287,36 @@ public class Game {
         return false;
     }
 
+    private int getTheNumberOfTheWinner(){
+        for(int i = 0 ; i<players.size(); i++){
+            if(players.get(i).hand.size() == 0){
+                return i;
+            }
+        }
+
+        //calculate the score of everybody
+        for(int i = 0 ; i<players.size(); i++){
+            GamePlayer thisPlayer = players.get(i);
+            thisPlayer.score = 0;
+            for(Card c : thisPlayer.hand){
+                if(c.color == CardColor.SMILE){
+                    thisPlayer.score += 30;
+                }else{
+                    thisPlayer.score += c.number;
+                }
+            }
+        }
+        int minScore = 9999;
+        int minScorePlayerIndex = 5;
+        for(int i = 0 ; i<players.size(); i++){
+            GamePlayer thisPlayer = players.get(i);
+            if(thisPlayer.score < minScore){
+                minScore = thisPlayer.score;
+                minScorePlayerIndex = i;
+            }
+        }
+        return minScorePlayerIndex;
+    }
     private void broadcastTheMyTurnMessase(GamePlayer player) throws IOException {
         int numberOfThisPlayer = players.indexOf(player);
 
@@ -345,18 +375,29 @@ public class Game {
         // }
         // cardPile.add(new Card(0, CardColor.SMILE));
         // cardPile.add(new Card(0, CardColor.SMILE));
-        // players.get(0).hand = new ArrayList<Card>();
-        // players.get(1).hand = new ArrayList<Card>();
+        cardPile=new ArrayList<Card>();
+        cardPile.add(new Card(0, CardColor.SMILE));
+        players.get(0).hand = new ArrayList<Card>();
+        players.get(1).hand = new ArrayList<Card>();
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(13, CardColor.RED));
-        // players.get(0).hand.add(new Card(13, CardColor.GREEN));
-        // players.get(0).hand.add(new Card(13, CardColor.BLUE));
-        // players.get(0).hand.add(new Card(13, CardColor.YELLOW));
-        // players.get(1).hand.add(new Card(10, CardColor.YELLOW));
-        // players.get(1).hand.add(new Card(11, CardColor.YELLOW));
-        // players.get(1).hand.add(new Card(12, CardColor.YELLOW));
+        players.get(0).hand.add(new Card(13, CardColor.GREEN));
+        players.get(0).hand.add(new Card(13, CardColor.BLUE));
+        players.get(0).hand.add(new Card(13, CardColor.YELLOW));
+        players.get(0).hand.add(new Card(13, CardColor.RED));
+        players.get(1).hand.add(new Card(10, CardColor.YELLOW));
+        players.get(1).hand.add(new Card(11, CardColor.YELLOW));
+        players.get(1).hand.add(new Card(12, CardColor.YELLOW));
         // players.get(1).hand.add(new Card(0, CardColor.SMILE));
+        // try {
+        //     for(int i = 0 ; i< players.size();i++){
+        //         players.get(i).oos.writeObject(generateServerToClientGameInfo(GameMessage.YOU_LOSE,players.get(i)));
+        //     }
+        // } catch (Exception e) {
+        //     //TODO: handle exception
+        // }
+        
         //---------------this segment is for test-------------------------
 
         GameSnapshot snapshot = new GameSnapshot(cardPile, cardGroups, players);
@@ -387,7 +428,28 @@ public class Game {
                             Card c = cardPile.get(0);
                             cardPile.remove(c);
                             player.hand.add(c);
+                            if (hasTheWinner()) {
+                                    int numberOfTheWinner = getTheNumberOfTheWinner();
+                                    //it seens do not nesseccery
+                                    //numberOfThisPlayer = players.indexOf(player);
 
+                                    //send breadcast message to other client
+                                    for (int i = 0; i < players.size(); i++) {
+                                        if (i == numberOfThisPlayer) {
+                                            players.get(i).oos.writeObject(
+                                                    generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
+                                            System.out.println("player" + numberOfThisPlayer + "  win the game");
+                                            continue;
+                                        }
+                                        players.get(i).oos.writeObject(
+                                                generateServerToClientGameInfo(GameMessage.YOU_LOSE, player));
+                                        System.out.println("player" + i + "  lose the game");
+                                    }
+                                    Thread.sleep(5000); // wait for client receive
+                                    break outer;
+                                }
+                                //candy ask me add this
+                                //sand a info to client,then the play can know what new card does he get
                             player.oos.writeObject(generateServerToClientGameInfo(GameMessage.YOUR_TURN, player));
 
                             break myTerm;
@@ -404,22 +466,23 @@ public class Game {
 
                             if (isTheMovementLegally(player, nowGameSnapshot)) {
                                 if (hasTheWinner()) {
+                                    int numberOfTheWinner = getTheNumberOfTheWinner();
                                     //it seens do not nesseccery
                                     //numberOfThisPlayer = players.indexOf(player);
 
                                     //send breadcast message to other client
                                     for (int i = 0; i < players.size(); i++) {
                                         if (i == numberOfThisPlayer) {
-                                            player.oos.writeObject(
+                                            players.get(i).oos.writeObject(
                                                     generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
                                             System.out.println("player" + numberOfThisPlayer + "  win the game");
                                             continue;
                                         }
-                                        player.oos.writeObject(
+                                        players.get(i).oos.writeObject(
                                                 generateServerToClientGameInfo(GameMessage.YOU_LOSE, player));
                                         System.out.println("player" + i + "  lose the game");
                                     }
-                                    Thread.sleep(1000); // wait for client receive
+                                    Thread.sleep(5000); // wait for client receive
                                     break outer;
                                 }
                                 player.oos.writeObject(generateServerToClientGameInfo(GameMessage.CONFIRM_OK, player));

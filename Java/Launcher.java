@@ -19,7 +19,7 @@ public class Launcher {
 
                 //start a server
                 if (inputString.compareToIgnoreCase("s") == 0) {
-                    System.out.println("how many player will join the game?");
+                    System.out.println("how many(2~4) player will join the game?");
                     int playerNum = 0;
                     while (true) {
                         if (sc.hasNextLine()) {

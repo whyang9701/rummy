@@ -8,6 +8,7 @@ public class GamePlayer {
     ObjectInputStream ois;
     ArrayList<Card> hand = new ArrayList<>();
     boolean isBreakedTheIce = false;
+    int score = 0;
     public GamePlayer(Socket clientConnection, ObjectOutputStream oos, ObjectInputStream ois) {
         this.clientConnection = clientConnection;
         this.oos = oos;
