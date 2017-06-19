@@ -102,6 +102,10 @@ public class Game {
                 }
                 int totalPoint = 0;
                 for (Card c : lastHand) {
+                    if(c.color == CardColor.SMILE){
+                        System.out.println("player do not allow to use smile card at break ice moment");
+                        return false;
+                    }
                     totalPoint += c.number;
                 }
                 if (totalPoint < 30) {
@@ -290,6 +294,7 @@ public class Game {
     private int getTheNumberOfTheWinner(){
         for(int i = 0 ; i<players.size(); i++){
             if(players.get(i).hand.size() == 0){
+                System.out.println("player"+i+"'s hand is zero ,so he or she is the winner'");
                 return i;
             }
         }
@@ -305,16 +310,20 @@ public class Game {
                     thisPlayer.score += c.number;
                 }
             }
+            System.out.println("player"+i+" get "+thisPlayer.score);
         }
-        int minScore = 9999;
+        int minScore = 9999999;
         int minScorePlayerIndex = 5;
         for(int i = 0 ; i<players.size(); i++){
             GamePlayer thisPlayer = players.get(i);
             if(thisPlayer.score < minScore){
+                //System.out.println("player"+i+"'s score is"+thisPlayer.score+" which is lower than lasst minScore:"+minScore);
+                
                 minScore = thisPlayer.score;
                 minScorePlayerIndex = i;
             }
         }
+        System.out.println("score of player"+minScorePlayerIndex+"'s hand is most lower ,so he or she is the winner");
         return minScorePlayerIndex;
     }
     private void broadcastTheMyTurnMessase(GamePlayer player) throws IOException {
@@ -375,20 +384,20 @@ public class Game {
         // }
         // cardPile.add(new Card(0, CardColor.SMILE));
         // cardPile.add(new Card(0, CardColor.SMILE));
-        cardPile=new ArrayList<Card>();
-        cardPile.add(new Card(0, CardColor.SMILE));
-        players.get(0).hand = new ArrayList<Card>();
-        players.get(1).hand = new ArrayList<Card>();
+        // cardPile=new ArrayList<Card>();
+        // cardPile.add(new Card(1, CardColor.RED));
+        // players.get(0).hand = new ArrayList<Card>();
+        // players.get(1).hand = new ArrayList<Card>();
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(13, CardColor.RED));
-        players.get(0).hand.add(new Card(13, CardColor.GREEN));
-        players.get(0).hand.add(new Card(13, CardColor.BLUE));
-        players.get(0).hand.add(new Card(13, CardColor.YELLOW));
-        players.get(0).hand.add(new Card(13, CardColor.RED));
-        players.get(1).hand.add(new Card(10, CardColor.YELLOW));
-        players.get(1).hand.add(new Card(11, CardColor.YELLOW));
-        players.get(1).hand.add(new Card(12, CardColor.YELLOW));
+        // players.get(0).hand.add(new Card(13, CardColor.GREEN));
+        // players.get(0).hand.add(new Card(13, CardColor.BLUE));
+        // players.get(0).hand.add(new Card(13, CardColor.YELLOW));
+        // players.get(0).hand.add(new Card(13, CardColor.RED));
+        // players.get(1).hand.add(new Card(10, CardColor.YELLOW));
+        // players.get(1).hand.add(new Card(11, CardColor.YELLOW));
+        // players.get(1).hand.add(new Card(12, CardColor.YELLOW));
         // players.get(1).hand.add(new Card(0, CardColor.SMILE));
         // try {
         //     for(int i = 0 ; i< players.size();i++){
@@ -435,7 +444,7 @@ public class Game {
 
                                     //send breadcast message to other client
                                     for (int i = 0; i < players.size(); i++) {
-                                        if (i == numberOfThisPlayer) {
+                                        if (i == numberOfTheWinner) {
                                             players.get(i).oos.writeObject(
                                                     generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
                                             System.out.println("player" + numberOfThisPlayer + "  win the game");
@@ -472,7 +481,7 @@ public class Game {
 
                                     //send breadcast message to other client
                                     for (int i = 0; i < players.size(); i++) {
-                                        if (i == numberOfThisPlayer) {
+                                        if (i == numberOfTheWinner) {
                                             players.get(i).oos.writeObject(
                                                     generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
                                             System.out.println("player" + numberOfThisPlayer + "  win the game");
