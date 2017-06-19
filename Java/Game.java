@@ -1,8 +1,6 @@
 import java.io.*;
 import java.util.*;
 
-
-
 public class Game {
     //this class designed for implementing rummikub game logic;
 
@@ -102,7 +100,7 @@ public class Game {
                 }
                 int totalPoint = 0;
                 for (Card c : lastHand) {
-                    if(c.color == CardColor.SMILE){
+                    if (c.color == CardColor.SMILE) {
                         System.out.println("player do not allow to use smile card at break ice moment");
                         return false;
                     }
@@ -151,7 +149,7 @@ public class Game {
                     System.out.println("cardGroup size higher than 13");
                     return false;
                 }
-                
+
                 // the algorithm is explain below
                 // if we can promise that the number will not duplicate
                 // we can get min and max number of cards in the card group
@@ -160,13 +158,13 @@ public class Game {
                 // then we can get difference,which is value z, of y and x
                 // if z does not smaller than the number of smile card mean that we don't have enough smile card to fill the vacancy of the number series
                 HashSet<Integer> set = new HashSet<>();
-                for(Card c:cardGroupCopy){
-                    if(!set.add(c.number)){
+                for (Card c : cardGroupCopy) {
+                    if (!set.add(c.number)) {
                         System.out.println("cardGroup should be series has duplicate numbers");
                         return false;
                     }
                 }
-                
+
                 int max = 0; //the lowest number of card is 1
                 int min = 14; // the highest number of card is 13
                 for (Card c : cardGroupCopy) {
@@ -230,10 +228,10 @@ public class Game {
                 //this data structure can't add the same thing which has been added 
                 HashSet<CardColor> set = new HashSet<CardColor>();
                 for (Card card : cardGroupCopy) {
-                    if(card.color == CardColor.SMILE){
+                    if (card.color == CardColor.SMILE) {
                         continue;
                     }
-                    if(!set.add(card.color)){
+                    if (!set.add(card.color)) {
                         System.out.println("cardGroup should be different color has same number");
                         return false;
                     }
@@ -291,41 +289,43 @@ public class Game {
         return false;
     }
 
-    private int getTheNumberOfTheWinner(){
-        for(int i = 0 ; i<players.size(); i++){
-            if(players.get(i).hand.size() == 0){
-                System.out.println("player"+i+"'s hand is zero ,so he or she is the winner'");
+    private int getTheNumberOfTheWinner() {
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).hand.size() == 0) {
+                System.out.println("player" + i + "'s hand is zero ,so he or she is the winner'");
                 return i;
             }
         }
 
         //calculate the score of everybody
-        for(int i = 0 ; i<players.size(); i++){
+        for (int i = 0; i < players.size(); i++) {
             GamePlayer thisPlayer = players.get(i);
             thisPlayer.score = 0;
-            for(Card c : thisPlayer.hand){
-                if(c.color == CardColor.SMILE){
+            for (Card c : thisPlayer.hand) {
+                if (c.color == CardColor.SMILE) {
                     thisPlayer.score += 30;
-                }else{
+                } else {
                     thisPlayer.score += c.number;
                 }
             }
-            System.out.println("player"+i+" get "+thisPlayer.score);
+            System.out.println("player" + i + " get " + thisPlayer.score);
         }
         int minScore = 9999999;
         int minScorePlayerIndex = 5;
-        for(int i = 0 ; i<players.size(); i++){
+        for (int i = 0; i < players.size(); i++) {
             GamePlayer thisPlayer = players.get(i);
-            if(thisPlayer.score < minScore){
+            if (thisPlayer.score < minScore) {
                 //System.out.println("player"+i+"'s score is"+thisPlayer.score+" which is lower than lasst minScore:"+minScore);
-                
+
                 minScore = thisPlayer.score;
                 minScorePlayerIndex = i;
             }
         }
-        System.out.println("score of player"+minScorePlayerIndex+"'s hand is most lower ,so he or she is the winner");
+        System.out
+                .println("score of player" + minScorePlayerIndex + "'s hand is most lower ,so he or she is the winner");
         return minScorePlayerIndex;
     }
+
     private void broadcastTheMyTurnMessase(GamePlayer player) throws IOException {
         int numberOfThisPlayer = players.indexOf(player);
 
@@ -363,7 +363,8 @@ public class Game {
 
         deal();
 
-        //todo ---------------this segment is for test-------------------------
+        //todo 
+        //---------------this segment is for test-------------------------
         // i want to manually asign cards
         // HashSet<Integer> set = new HashSet<>();
         // System.out.println(set.add(1));
@@ -386,8 +387,24 @@ public class Game {
         // cardPile.add(new Card(0, CardColor.SMILE));
         // cardPile=new ArrayList<Card>();
         // cardPile.add(new Card(1, CardColor.RED));
-        // players.get(0).hand = new ArrayList<Card>();
-        // players.get(1).hand = new ArrayList<Card>();
+        //players.get(0).hand = new ArrayList<Card>();
+        //players.get(1).hand = new ArrayList<Card>();
+        // for (int j = 0; j < 2; j++) {
+        //     for (int i = 1; i <= 13; i++) {
+        //         players.get(0).hand.add(new Card(i, CardColor.RED));
+        //     }
+        //     for (int i = 1; i <= 13; i++) {
+        //         players.get(0).hand.add(new Card(i, CardColor.YELLOW));
+        //     }
+        //     for (int i = 1; i <= 13; i++) {
+        //         players.get(0).hand.add(new Card(i, CardColor.BLUE));
+        //     }
+        //     for (int i = 1; i <= 13; i++) {
+        //         players.get(0).hand.add(new Card(i, CardColor.GREEN));
+        //     }
+        // }
+        // players.get(0).hand.add(new Card(0, CardColor.SMILE));
+        // players.get(0).hand.add(new Card(0, CardColor.SMILE));
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(0,CardColor.SMILE));
         // players.get(0).hand.add(new Card(13, CardColor.RED));
@@ -406,7 +423,7 @@ public class Game {
         // } catch (Exception e) {
         //     //TODO: handle exception
         // }
-        
+
         //---------------this segment is for test-------------------------
 
         GameSnapshot snapshot = new GameSnapshot(cardPile, cardGroups, players);
@@ -438,27 +455,27 @@ public class Game {
                             cardPile.remove(c);
                             player.hand.add(c);
                             if (hasTheWinner()) {
-                                    int numberOfTheWinner = getTheNumberOfTheWinner();
-                                    //it seens do not nesseccery
-                                    //numberOfThisPlayer = players.indexOf(player);
+                                int numberOfTheWinner = getTheNumberOfTheWinner();
+                                //it seens do not nesseccery
+                                //numberOfThisPlayer = players.indexOf(player);
 
-                                    //send breadcast message to other client
-                                    for (int i = 0; i < players.size(); i++) {
-                                        if (i == numberOfTheWinner) {
-                                            players.get(i).oos.writeObject(
-                                                    generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
-                                            System.out.println("player" + numberOfThisPlayer + "  win the game");
-                                            continue;
-                                        }
+                                //send breadcast message to other client
+                                for (int i = 0; i < players.size(); i++) {
+                                    if (i == numberOfTheWinner) {
                                         players.get(i).oos.writeObject(
-                                                generateServerToClientGameInfo(GameMessage.YOU_LOSE, player));
-                                        System.out.println("player" + i + "  lose the game");
+                                                generateServerToClientGameInfo(GameMessage.YOU_WIN, player));
+                                        System.out.println("player" + numberOfThisPlayer + "  win the game");
+                                        continue;
                                     }
-                                    Thread.sleep(5000); // wait for client receive
-                                    break outer;
+                                    players.get(i).oos
+                                            .writeObject(generateServerToClientGameInfo(GameMessage.YOU_LOSE, player));
+                                    System.out.println("player" + i + "  lose the game");
                                 }
-                                //candy ask me add this
-                                //sand a info to client,then the play can know what new card does he get
+                                Thread.sleep(5000); // wait for client receive
+                                break outer;
+                            }
+                            //candy ask me add this
+                            //sand a info to client,then the play can know what new card does he get
                             player.oos.writeObject(generateServerToClientGameInfo(GameMessage.YOUR_TURN, player));
 
                             break myTerm;

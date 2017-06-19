@@ -44,7 +44,8 @@ public class GameClient {
                     System.out.println("First,enter the number of the card.");
                     System.out.println("Second,enter the color of the card,split them with blank space.");
                     System.out.println("(Use the first letter(lower case) of colors' names to represent the color of the card.");
-                    System.out.println("For example,the r letter represents color red,and the b letter represents color blue)");
+                    System.out.println("For example,the r letter represents color red,and the b letter represents color blue.");
+                    System.out.println("If you want to enter joker,enter any number and the letter s.)");
 
                     System.out.println(">>Number of cards in the card pile : " + gameInfo.remainCardPileNumber + "\n"); //cardpile
 
@@ -79,7 +80,7 @@ public class GameClient {
                             gameInfo.playerMovement = PlayerMovement.Pick_One_Card;
                             writegameinfo();
 
-                            if(gameInfo.remainCardPileNumber!=1){
+                            if(gameInfo.remainCardPileNumber!=1){ 
                                 readgameinfo();
                                 System.out.println("This turn ends.");
                                 showhands();
@@ -90,13 +91,13 @@ public class GameClient {
 
                         else if (input.compareToIgnoreCase("1") == 0) { //got cards to play
                             int cardplayedtotalnumber = 0;
-
+                            int initialgroupnumber = gameInfo.copy.cardGroups.size() - 1;
                             int originalhandsnumber = gameInfo.playersHand.size();
                             int cardplace = -2;
                             int cardgroup = 0;
                             Card cardtoplay = null;
                             boolean playcardcomplete = false;
-                            int initialgroupnumber = gameInfo.copy.cardGroups.size() - 1;
+                            
                             //boolean wanttoendplaycard = false;
                             while (!playcardcomplete) {
                                 System.out.println("Please enter your movement : "); //second movement choice
@@ -232,9 +233,7 @@ public class GameClient {
                                         inputck1=false;
                                         while (!inputck1) { //which card
                                             System.out.println("Which card in this group would you like to move?"); //which card
-                                            System.out.println("what number is the card ex: 1 r\nex: 2 b\nex: 3 g\nex: 4 y\nex: 0 s");
                                             in();
-                                            
                                             cardtomovenumber = ti();
                                             in();
                                             cardtomovecolor = getcolor(input);
@@ -281,10 +280,18 @@ public class GameClient {
                                             }
                                             inputck1 = true;
                                         }
-                                        System.out.print(
+                                        if (togroup != -1) {
+                                            System.out.print(
                                                 "Move" + cardtomove.toString() + "in the (" + fromgroup + ")group"); //check right card
-                                        System.out.println(" to (" + togroup + ")group,is this right?");
-                                        System.out.println("0=No,1=Yes.");
+                                            System.out.println(" to (" + togroup + ")group,is this right?");
+                                            System.out.println("0=No,1=Yes.");
+                                        } else {
+                                            System.out.print(
+                                                "Move" + cardtomove.toString() + "in the (" + fromgroup + ")group"); //check right card
+                                            System.out.println(" to a new group,is this right?");
+                                            System.out.println("0=No,1=Yes.");
+                                        }
+                                        
                                         while (true) //QvQ
                                         {
                                             in();
@@ -298,6 +305,10 @@ public class GameClient {
                                             } else
                                                 plz();
                                         }
+                                    }
+                                    if (togroup == -1) { //create new card group
+                                        gameInfo.copy.cardGroups.add(new ArrayList<Card>());
+                                        togroup = gameInfo.copy.cardGroups.size() - 1;
                                     }
                                     gameInfo.copy.cardGroups.get(togroup).add(cardtomove);
                                     gameInfo.copy.cardGroups.get(fromgroup).remove(cardtomoveindex);
@@ -497,7 +508,10 @@ public class GameClient {
             cardgroupnumbering++;
             s += "\n";
         }
+
         System.out.println(s + "\n");
+
+
     }
 
     public void showhands() {
@@ -574,7 +588,14 @@ public class GameClient {
     }
 
     public int ti() {
-        return Integer.parseInt(input);
+        while(true){
+            try{
+                return Integer.parseInt(input);
+            } catch(Exception e){
+                plz();
+            }
+        }
+        
     }
 
     public CardColor getcolor(String in) {
