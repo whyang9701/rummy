@@ -39,11 +39,12 @@ public class GameClient {
 
                 if (gameInfo.message == GameMessage.YOUR_TURN) {
                     System.out.println("It's your turn =D"); //your turn
-
+                    //rules
                     System.out.println("Here's the rule for inputting the card (used when moving a card) : ");
                     System.out.println("First,enter the number of the card.");
                     System.out.println("Second,enter the color of the card,split them with blank space.");
-                    System.out.println("");
+                    System.out.println("(Use the first letter(lower case) of colors' names to represent the color of the card.");
+                    System.out.println("For example,the r letter represents color red,and the b letter represents color blue)");
 
                     System.out.println(">>Number of cards in the card pile : " + gameInfo.remainCardPileNumber + "\n"); //cardpile
 
@@ -77,7 +78,7 @@ public class GameClient {
                             complete = true;
                             gameInfo.playerMovement = PlayerMovement.Pick_One_Card;
                             writegameinfo();
-                            
+
                             if(gameInfo.remainCardPileNumber!=1){
                                 readgameinfo();
                                 System.out.println("This turn ends.");
@@ -178,10 +179,9 @@ public class GameClient {
                                         }
 
                                     } //right card and place
-                                    if (cardgroup == -1 && !inputck3) { //create new card group
+                                    if (cardgroup == -1) { //create new card group
                                         gameInfo.copy.cardGroups.add(new ArrayList<Card>());
                                         cardgroup = gameInfo.copy.cardGroups.size() - 1;
-                                        inputck3=false;
                                     }
                                     cardtoplay = gameInfo.playersHand.get(cardplace); //get card to play
                                     gameInfo.copy.cardGroups.get(cardgroup).add(cardtoplay); //add card to play
@@ -189,11 +189,8 @@ public class GameClient {
 
                                     if (cardtoplay.color != CardColor.SMILE) { //sort
                                         sort(cardgroup);
-                                        //System.out.println("Sort card.");
-                                        //System.out.println("GOT "+gameInfo.copy.cardGroups.get(cardgroup).size());
                                     } else {
                                         sortjoker(cardgroup); //sort joker
-                                        //System.out.println("Sort joker.");
                                     }
 
                                     gameInfo.playerMovement = PlayerMovement.Out_Of_A_Card; //send gameinfo
@@ -232,10 +229,12 @@ public class GameClient {
                                             in();
                                             fromgroup = ti();
                                         }
-
+                                        inputck1=false;
                                         while (!inputck1) { //which card
                                             System.out.println("Which card in this group would you like to move?"); //which card
+                                            System.out.println("what number is the card ex: 1 r\nex: 2 b\nex: 3 g\nex: 4 y\nex: 0 s");
                                             in();
+                                            
                                             cardtomovenumber = ti();
                                             in();
                                             cardtomovecolor = getcolor(input);
@@ -284,7 +283,7 @@ public class GameClient {
                                         }
                                         System.out.print(
                                                 "Move" + cardtomove.toString() + "in the (" + fromgroup + ")group"); //check right card
-                                        System.out.println("to (" + togroup + ")group,is this right?");
+                                        System.out.println(" to (" + togroup + ")group,is this right?");
                                         System.out.println("0=No,1=Yes.");
                                         while (true) //QvQ
                                         {
@@ -311,6 +310,8 @@ public class GameClient {
                                     gameInfo.playerMovement = PlayerMovement.Move_One_Card;
                                     writegameinfo();
                                     readgameinfo();
+                                    showcardgroups();
+                                    showhands();
                                 }
 
                                 else if (input.compareToIgnoreCase("2") == 0) { //end move
@@ -391,6 +392,7 @@ public class GameClient {
                                                 } else if (gameInfo.message == GameMessage.YOU_WIN) {
                                                     System.out.println("\n" + "You win.");
                                                     closeProgram();
+                                                    System.exit(1);
                                                 }
                                                 break;
                                             } else if (input.compareToIgnoreCase("0") == 0) {
@@ -429,11 +431,13 @@ public class GameClient {
                             plz();
 
                     }
+
                     if (rollback) {
                         System.out.println("\n" + "Restart this turn : " + "\n");
                         rollback = false;
                         complete = false;
-                    }
+                    } //your turn ends
+
                 } else if (gameInfo.message == GameMessage.PLAYER1s_TURN) {
                     System.out.println("It's player1's turn." + "\n");
                 }
